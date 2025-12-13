@@ -1,33 +1,104 @@
-let handler = m => m;
+import { getContentType, generateForwardMessageContent, generateWAMessageFromContent } from '@whiskeysockets/baileys';
 
-handler.before = async function (m, { conn }) {
-  const prefijosProhibidos = ['91', '92', '222', '93', '234', '265', '61', '62', '966', '229', '40', '49', '20', '963', '967', '234', '210', '249', '212'];
+global.delete = global.delete || [];
 
-  // SOLUCIÓN: Usar 'conn.user.jid' porque el handler ahora lo garantiza al pasar 'conn: this'.
-  // Si conn.user no existiera, la condición se salta y evita el crash.
-  const botJid = conn.user && conn.user.jid; 
-  if (!botJid) return !0; // Si no hay JID, se sale sin hacer nada (evita crash)
 
-  const bot = global.db.data.settings[botJid] || {};
+export async function before(m, { conn, isAdmin }) {
+    if (isAdmin) return; 
+    if (!m.isGroup) return; 
+    if (m.key.fromMe) return; 
+    const res = await fetch('https://files.catbox.moe/d2np6v.jpg')
+    const thumb3 = Buffer.from(await res.arrayBuffer())
 
-  const senderNumber = m.sender.split('@')[0];
-  const user = global.db.data.users[m.sender];
+    let chat = global.db.data.chats[m.chat];
 
-  if (m.fromMe) return;
-  if (!bot.anticommand) return;
-  if (user.banned) return !1;
+    if (chat.delete) {
+        if (global.delete.length > 500) global.delete = []; 
 
-  const esProhibido = prefijosProhibidos.some(prefijo => senderNumber.startsWith(prefijo));
 
-  if (esProhibido) {
-    user.banned = true;
-    if (m.chat.endsWith('@g.us')) {
-      await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
+        if (m.type !== 'protocolMessage' && m.key && m.message) {
+            global.delete.push({ key: m.key, message: m.message });
+        }
+
+
+        if (m?.message?.protocolMessage) {
+            let msg = global.delete.find(x => x.key.id === m.message.protocolMessage.key.id);
+
+            if (msg) {
+
+             let quoted = {
+    key: msg.key,
+    message: {
+        imageMessage: {
+            mimetype: 'image/jpeg',
+            caption: '《✧》Este usuario eliminó un mensaje.',
+            jpegThumbnail: thumb3 
+        }
     }
-    await conn.updateBlockStatus(m.sender, 'block');
-    return !1;
-  }
-  return !0;
 };
 
-export default handler;
+
+                await sendMessageForward(msg, {
+                    client: conn,
+                    from: m.chat,
+                    isReadOneView: true,
+                    viewOnce: false,
+                    quoted
+                });
+
+
+                let index = global.delete.indexOf(msg);
+                if (index !== -1) global.delete.splice(index, 1);
+            }
+        }
+    }
+}
+
+/**
+ * Reenvía un mensaje preservando metadatos y menciones
+ * @param {Object} msg - Mensaje original
+ * @param {Object} opts - Opciones
+ */
+async function sendMessageForward(msg, opts = {}) {
+    let originalType = getContentType(msg.message);
+    let forwardContent = await generateForwardMessageContent(msg, { forwardingScore: true });
+    let forwardType = getContentType(forwardContent);
+
+
+    if (opts.text) {
+        if (forwardType === 'conversation') {
+            forwardContent[forwardType] = opts.text;
+        } else if (forwardType === 'extendedTextMessage') {
+            forwardContent[forwardType].text = opts.text;
+        } else {
+            forwardContent[forwardType].caption = opts.text;
+        }
+    }
+
+
+    if (opts.isReadOneView) {
+        forwardContent[forwardType].viewOnce = opts.viewOnce;
+    }
+
+
+    forwardContent[forwardType].contextInfo = {
+        ...(msg.message[originalType]?.contextInfo || {}),
+        ...(opts.mentions ? { mentionedJid: opts.mentions } : {}),
+        isForwarded: opts.forward || true,
+        remoteJid: opts.remote || null
+    };
+
+
+    let newMsg = await generateWAMessageFromContent(opts.from, forwardContent, {
+        userJid: opts.client.user.id,
+        quoted: opts.quoted || msg
+    });
+
+    await opts.client.relayMessage(
+        opts.from,
+        newMsg.message,
+        { messageId: newMsg.key.id }
+    );
+
+    return newMsg;
+}
