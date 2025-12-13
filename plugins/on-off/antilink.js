@@ -107,18 +107,18 @@ let handler = async (m, { isAdmin, isOwner }) => {
   const chat = global.db.data.chats[m.chat]
   const text = (m.text || '').toLowerCase().trim()
 
-  if (text === '.on antilink') {
+  if (text === 'on antilink') {
     chat.antiLink = true
     return m.reply('✅ AntiLink activado')
   }
 
-  if (text === '.off antilink') {
+  if (text === 'off antilink') {
     chat.antiLink = false
     return m.reply('❌ AntiLink desactivado')
   }
 }
 
-handler.command = /^\.on antilink$|^\.off antilink$/i
+handler.command = /^\on antilink$|^\off antilink$/i
 handler.group = true
 handler.admin = true
 
