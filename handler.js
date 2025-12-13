@@ -161,7 +161,19 @@ let isBotAdmin = false
 
 if (m.isGroup) {
     try {
-        groupMetadata = await this.groupMetadata(m.chat)  // <-- Cambiar conn por this
+        global.groupCache ||= new Map()
+
+        const cached = global.groupCache.get(m.chat)
+        if (cached && Date.now() - cached.time < 60_000) {
+            groupMetadata = cached.data
+        } else {
+            groupMetadata = await this.groupMetadata(m.chat)
+            global.groupCache.set(m.chat, {
+                data: groupMetadata,
+                time: Date.now()
+            })
+        }
+
         participants = groupMetadata.participants || []
         
         // Buscar al usuario actual
