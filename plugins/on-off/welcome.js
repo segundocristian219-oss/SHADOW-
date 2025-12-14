@@ -48,8 +48,8 @@ export async function before(m, { conn, groupMetadata }) {
   if (!m.isGroup || !m.messageStubType) return true
 
   const chat = global.db.data.chats[m.chat]
-  if (chat.bienvenida === undefined) chat.bienvenida = true
-  if (!chat.bienvenida) return true
+  if (chat.welcome === undefined) chat.welcome = true
+if (!chat.welcome) return true
 
   const groupName = groupMetadata?.subject || 'Grupo'
   const groupDesc = groupMetadata?.desc || 'Sin descripción'
