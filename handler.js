@@ -298,7 +298,7 @@ console.error(err)
 } finally {
 try {
 if (!opts["noprint"]) await (await import("./lib/print.js")).default(m, this)
-} catch {}
+} catch (e) {}
 }
 }
 
