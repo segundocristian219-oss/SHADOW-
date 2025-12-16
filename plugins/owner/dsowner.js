@@ -1,5 +1,3 @@
-/* Codigo hecho por @Fabri115 y mejorado por BrunoSobrino
-   Fix y limpieza real por ChatGPT */
 
 import fs from 'fs'
 import path from 'path'
