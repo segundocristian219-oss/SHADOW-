@@ -13,8 +13,8 @@ const TMP_DIR = path.join(process.cwd(), "tmp")
 if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true })
 
 const CACHE_FILE = path.join(TMP_DIR, "cache.json")
-const SKY_BASE = (process.env.API_BASE || "https://api-sky.ultraplus.click/").replace(/\/+$/, "")
-const SKY_KEY = process.env.API_KEY || "sk_80d69172-f6c4-430d-be35-395b72e7113b"
+const SKY_BASE = (process.env.API_BASE || "https://api-sky.ultraplus.click").replace(/\/+$/, "")
+const SKY_KEY = process.env.API_KEY || "Angxllll"
 
 const MAX_CONCURRENT = 3
 const MAX_MB = 99
