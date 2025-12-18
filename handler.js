@@ -26,8 +26,6 @@ export async function handler(chatUpdate) {
   let m = chatUpdate.messages[chatUpdate.messages.length - 1]
   if (!m) return
 
-  const quotedOriginal = m.quoted
-
   global.processedMessages ||= new Set()
   if (global.processedMessages.size > 5000) global.processedMessages.clear()
 
