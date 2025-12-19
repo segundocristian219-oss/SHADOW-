@@ -1,4 +1,3 @@
-// commands/spotify.js — Spotify interactivo (👍 audio normal / ❤️ documento o 1/2)
 "use strict";
 
 import axios from "axios";
@@ -32,11 +31,7 @@ async function getSpotifyMp3(input) {
 
   let data = res;
   if (typeof data === "string") {
-    try {
-      data = JSON.parse(data.trim());
-    } catch {
-      throw new Error("Respuesta no JSON del servidor");
-    }
+    try { data = JSON.parse(data.trim()); } catch { throw new Error("Respuesta no JSON del servidor"); }
   }
 
   const ok = data?.status === true || data?.status === "true";
@@ -51,6 +46,10 @@ async function getSpotifyMp3(input) {
   return { mp3Url, title, artist };
 }
 
+function safeBaseFromTitle(title) {
+  return String(title || "spotify").slice(0, 70).replace(/[^A-Za-z0-9 _-]+/g, "_");
+}
+
 async function sendAudio(conn, job, asDocument, triggerMsg) {
   const { chatId, mp3Url, title, artist, previewKey, quotedBase } = job;
 
@@ -58,14 +57,14 @@ async function sendAudio(conn, job, asDocument, triggerMsg) {
     await react(conn, chatId, triggerMsg.key, asDocument ? "📁" : "🎵");
     await react(conn, chatId, previewKey, "⏳");
 
-    const caption = asDocument ? undefined : `\( {title}\npor \){artist}`;
+    const caption = asDocument ? undefined : `${title}\npor ${artist}`;
 
     await conn.sendMessage(
       chatId,
       {
         [asDocument ? "document" : "audio"]: { url: mp3Url },
         mimetype: "audio/mpeg",
-        fileName: asDocument ? `\( {safeBaseFromTitle(title)} - \){artist}.mp3` : undefined,
+        fileName: asDocument ? `${safeBaseFromTitle(title)} - ${artist}.mp3` : undefined,
         caption,
       },
       { quoted: quotedBase || triggerMsg }
@@ -84,19 +83,15 @@ async function sendAudio(conn, job, asDocument, triggerMsg) {
   }
 }
 
-function safeBaseFromTitle(title) {
-  return String(title || "spotify").slice(0, 70).replace(/[^A-Za-z0-9_\-.]+/g, "_");
-}
-
-const spotifyHandler = async (msg, { conn, args, command }) => {
+const handler = async (msg, { conn, args, command }) => {
   const chatId = msg.key.remoteJid;
   const pref = global.prefixes?.[0] || ".";
-  let text = (args.join(" ") || "").trim();
+  const text = (args.join(" ") || "").trim();
 
   if (!text) {
     return conn.sendMessage(
       chatId,
-      { text: `✳️ Usa:\n\ .sp <canción o URL>\n\nEjemplo:\n${pref}sp bad bunny tití me preguntó` },
+      { text: `✳️ Usa:\n${pref}sp <canción o URL>\n\nEjemplo:\n${pref}sp bad bunny tití me preguntó` },
       { quoted: msg }
     );
   }
@@ -147,7 +142,7 @@ const spotifyHandler = async (msg, { conn, args, command }) => {
               const job = pendingSPOTIFY[reactKey.id];
               if (!job) continue;
               if (job.chatId !== m.key.remoteJid) continue;
-              if (emoji !== "👍" && emoji !== "❤️") continue;
+              if (!["👍", "❤️"].includes(emoji)) continue;
               if (job.processing) continue;
 
               job.processing = true;
@@ -164,7 +159,7 @@ const spotifyHandler = async (msg, { conn, args, command }) => {
             if (replyTo && pendingSPOTIFY[replyTo]) {
               const job = pendingSPOTIFY[replyTo];
               if (job.chatId !== m.key.remoteJid) continue;
-              if (body !== "1" && body !== "2") continue;
+              if (!["1","2"].includes(body)) continue;
               if (job.processing) continue;
 
               job.processing = true;
@@ -192,7 +187,7 @@ const spotifyHandler = async (msg, { conn, args, command }) => {
   }
 };
 
-export default spotifyHandler;
-export const command = ["spotify", "sp"];
-export const help = ["spotify <canción o url>", "sp <canción o url>"];
-export const tags = ["descargas"];
+handler.command = ["spotify","sp"];
+handler.help = ["spotify <canción o url>"];
+handler.tags = ["descargas"];
+export default handler;
