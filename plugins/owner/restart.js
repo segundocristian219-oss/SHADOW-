@@ -1,25 +1,45 @@
-const handler = async (m, { conn, isROwner, text }) => {
-    try {
-        const { key } = await conn.sendMessage(m.chat, { text: `🚀🚀` }, { quoted: m })
-        await delay(1000)
-        await conn.sendMessage(m.chat, { text: `🚀🚀🚀🚀`, edit: key })
-        await delay(1000)
-        await conn.sendMessage(m.chat, { text: `🚀🚀🚀🚀🚀🚀`, edit: key })
-        await conn.sendMessage(m.chat, { text: `𝙍𝙚𝙞𝙣𝙞𝙘𝙞𝙖𝙧 | 𝙍𝙚𝙨𝙩𝙖𝙧𝙩`, edit: key })
+import fs from "fs";
+import path from "path";
+import { exec } from "child_process";
 
-        process.exit(0)
+const handler = async (msg, { conn }) => {
+  const chatId = msg.key.remoteJid;
 
-    } catch (error) {
-        console.log(error)
-        conn.reply(m.chat, `${error}`, m)
+  const lastRestarterFile = "./lastRestarter.json";
+  if (!fs.existsSync(lastRestarterFile)) {
+    fs.writeFileSync(lastRestarterFile, JSON.stringify({ chatId: "" }, null, 2));
+  }
+
+  exec("git pull", async (error, stdout, stderr) => {
+    if (error) {
+      await conn.sendMessage(chatId, {
+        text: `❌ Error al actualizar: ${error.message}`
+      }, { quoted: msg });
+      return;
     }
-}
 
-handler.help = ['restart']
-handler.tags = ['owner']
-handler.command = ['res', 'reiniciar', 'restart']
-handler.owner = true
+    const output = stdout || stderr;
+    if (output.includes("Already up to date")) {
+      await conn.sendMessage(chatId, {
+        text: `✅ *Ya estás usando la última versión.*`
+      }, { quoted: msg });
+    } else {
+      const mensaje = `✅ *Actualización completada:*\n\n${output.trim()}\n\n🔄 Reiniciando el servidor...`;
 
-export default handler
+      await conn.sendMessage(chatId, {
+        react: { text: "🔄", key: msg.key }
+      });
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+      await conn.sendMessage(chatId, {
+        text: mensaje
+      }, { quoted: msg });
+
+      fs.writeFileSync(lastRestarterFile, JSON.stringify({ chatId }, null, 2));
+
+      setTimeout(() => process.exit(1), 3000);
+    }
+  });
+};
+
+handler.command = ["carga", "update"];
+export default handler;
