@@ -16,10 +16,10 @@ let handler = async (m) => {
 
   if (restante > 0) {
     const h = Math.floor(restante / 3600000)
-    const m = Math.floor((restante % 3600000) / 60000)
+    const min = Math.floor((restante % 3600000) / 60000)
 
     return m.reply(
-      `🐾 *${chat.mascotaGrupo}* ya comió.\n\n⏳ Intenta de nuevo en *${h}h ${m}m*.`
+      `🐾 *${chat.mascotaGrupo}* ya comió.\n\n⏳ Intenta de nuevo en *${h}h ${min}m*.`
     )
   }
 
