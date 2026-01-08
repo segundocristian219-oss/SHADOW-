@@ -1,38 +1,25 @@
-let handler = async (m) => {
+
+let handler = async (m, { args }) => {
   const chat = global.db.data.chats[m.chat]
 
   if (!chat.mascotaGrupo) {
-    return m.reply('❌ Este chat no tiene una mascota.\nUsa *mimascota* para elegir una.')
+    return m.reply('❌ Este chat no tiene ninguna mascota que eliminar.')
   }
 
-  const ahora = Date.now()
-  const cooldown = 4 * 60 * 60 * 1000
+  const mascota = chat.mascotaGrupo
 
-  if (!chat.mascotaUltimaComida) {
-    chat.mascotaUltimaComida = 0
-  }
-
-  const restante = cooldown - (ahora - chat.mascotaUltimaComida)
-
-  if (restante > 0) {
-    const h = Math.floor(restante / 3600000)
-    const min = Math.floor((restante % 3600000) / 60000)
-
-    return m.reply(
-      `🐾 *${chat.mascotaGrupo}* ya comió.\n\n⏳ Intenta de nuevo en *${h}h ${min}m*.`
-    )
-  }
-
-  chat.mascotaUltimaComida = ahora
-  chat.mascotaHambre = 0
+  delete chat.mascotaGrupo
+  delete chat.mascotaUltimaComida
+  delete chat.mascotaHambre
 
   m.reply(
-    `🍖 Has alimentado a *${chat.mascotaGrupo}*.\n🐾 Está feliz 😸`
+    `🗑️ La mascota *${mascota}* ha sido eliminada.\n\n` +
+    `🐾 Ahora pueden elegir una nueva usando *mimascota*.`
   )
 }
 
-handler.help = ['darcomida']
+handler.help = ['delmascota']
 handler.tags = ['rpg']
-handler.command = ['darcomida']
+handler.command = ['delmascota']
 
 export default handler
