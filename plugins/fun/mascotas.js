@@ -14,18 +14,14 @@ const mascotas = [
   '🦁 León'
 ]
 
-let handler = async (m, { args, isGroup }) => {
-  if (!isGroup) {
-    return m.reply('❌ Este comando solo puede usarse en *grupos*.')
-  }
-
+let handler = async (m, { args }) => {
   const chat = global.db.data.chats[m.chat]
   const mascotaElegida = args.join(' ')
 
-  // Ya existe mascota en el grupo
+  // Ya existe mascota en este chat
   if (chat.mascotaGrupo) {
     return m.reply(
-      `🐾 Este grupo ya tiene una mascota:\n\n*${chat.mascotaGrupo}*\n\n❌ No se puede cambiar.`
+      `🐾 Este chat ya tiene una mascota:\n\n*${chat.mascotaGrupo}*\n\n❌ No se puede cambiar.`
     )
   }
 
@@ -39,7 +35,7 @@ let handler = async (m, { args, isGroup }) => {
   chat.mascotaGrupo = mascotaElegida
 
   m.reply(
-    `🎉 ¡Mascota del grupo establecida!\n\n` +
+    `🎉 ¡Mascota establecida!\n\n` +
     `🐾 Mascota: *${mascotaElegida}*\n` +
     `👤 Elegida por: *@${m.sender.split('@')[0]}*`,
     null,
@@ -48,8 +44,7 @@ let handler = async (m, { args, isGroup }) => {
 }
 
 handler.help = ['mimascota']
-handler.tags = ['rpg', 'group']
+handler.tags = ['rpg']
 handler.command = ['mimascota']
-handler.group = true
 
 export default handler
