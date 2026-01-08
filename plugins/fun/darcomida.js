@@ -1,52 +1,38 @@
-const mascotas = {
-  pollito: '🐤 Pollito',
-  loro: '🦜 Loro',
-  gato: '🐱 Gato',
-  gallina: '🐔 Gallina',
-  perro: '🐶 Perro',
-  pingüino: '🐧 Pingüino',
-  hamster: '🐹 Hámster',
-  simio: '🐒 Simio',
-  aguila: '🦅 Águila',
-  cocodrilo: '🐊 Cocodrilo',
-  lobo: '🐺 Lobo',
-  tigre: '🐯 Tigre',
-  leon: '🦁 León'
-}
-
-let handler = async (m, { args }) => {
+let handler = async (m) => {
   const chat = global.db.data.chats[m.chat]
 
-  const input = args.join(' ')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z]/g, '')
+  if (!chat.mascotaGrupo) {
+    return m.reply('❌ Este chat no tiene una mascota.\nUsa *mimascota* para elegir una.')
+  }
 
-  const mascotaElegida = mascotas[input]
+  const ahora = Date.now()
+  const cooldown = 4 * 60 * 60 * 1000
 
-  if (chat.mascotaGrupo) {
+  if (!chat.mascotaUltimaComida) {
+    chat.mascotaUltimaComida = 0
+  }
+
+  const restante = cooldown - (ahora - chat.mascotaUltimaComida)
+
+  if (restante > 0) {
+    const h = Math.floor(restante / 3600000)
+    const m = Math.floor((restante % 3600000) / 60000)
+
     return m.reply(
-      `🐾 Este chat ya tiene una mascota:\n\n*${chat.mascotaGrupo}*`
+      `🐾 *${chat.mascotaGrupo}* ya comió.\n\n⏳ Intenta de nuevo en *${h}h ${m}m*.`
     )
   }
 
-  if (!mascotaElegida) {
-    return m.reply(
-      `🐾 *Mascotas disponibles:*\n\n` +
-      Object.values(mascotas).map(v => `• *mimascota ${v}*`).join('\n')
-    )
-  }
-
-  chat.mascotaGrupo = mascotaElegida
+  chat.mascotaUltimaComida = ahora
+  chat.mascotaHambre = 0
 
   m.reply(
-    `🎉 ¡Mascota establecida!\n\n🐾 *${mascotaElegida}*`
+    `🍖 Has alimentado a *${chat.mascotaGrupo}*.\n🐾 Está feliz 😸`
   )
 }
 
-handler.help = ['mimascota <mascota>']
+handler.help = ['darcomida']
 handler.tags = ['rpg']
-handler.command = ['mimascota']
+handler.command = ['darcomida']
 
 export default handler
