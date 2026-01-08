@@ -1,49 +1,51 @@
-const mascotas = [
-  '🐤 Pollito',
-  '🦜 Loro',
-  '🐱 Gato',
-  '🐔 Gallina',
-  '🐶 Perro',
-  '🐧 Pingüino',
-  '🐹 Hámster',
-  '🐒 Simio',
-  '🦅 Águila',
-  '🐊 Cocodrilo',
-  '🐺 Lobo',
-  '🐯 Tigre',
-  '🦁 León'
-]
+const mascotas = {
+  pollito: '🐤 Pollito',
+  loro: '🦜 Loro',
+  gato: '🐱 Gato',
+  gallina: '🐔 Gallina',
+  perro: '🐶 Perro',
+  pingüino: '🐧 Pingüino',
+  hamster: '🐹 Hámster',
+  simio: '🐒 Simio',
+  aguila: '🦅 Águila',
+  cocodrilo: '🐊 Cocodrilo',
+  lobo: '🐺 Lobo',
+  tigre: '🐯 Tigre',
+  leon: '🦁 León'
+}
 
 let handler = async (m, { args }) => {
   const chat = global.db.data.chats[m.chat]
-  const mascotaElegida = args.join(' ')
 
-  // Ya existe mascota en este chat
+  const input = args.join(' ')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z]/g, '')
+
+  const mascotaElegida = mascotas[input]
+
   if (chat.mascotaGrupo) {
     return m.reply(
-      `🐾 Este chat ya tiene una mascota:\n\n*${chat.mascotaGrupo}*\n\n❌ No se puede cambiar.`
+      `🐾 Este chat ya tiene una mascota:\n\n*${chat.mascotaGrupo}*`
     )
   }
 
-  if (!mascotaElegida || !mascotas.includes(mascotaElegida)) {
+  if (!mascotaElegida) {
     return m.reply(
-      `🐾 *Elige una mascota válida escribiendo el comando exactamente:*\n\n` +
-      mascotas.map(v => `• *mimascota ${v}*`).join('\n')
+      `🐾 *Mascotas disponibles:*\n\n` +
+      Object.values(mascotas).map(v => `• *mimascota ${v}*`).join('\n')
     )
   }
 
   chat.mascotaGrupo = mascotaElegida
 
   m.reply(
-    `🎉 ¡Mascota establecida!\n\n` +
-    `🐾 Mascota: *${mascotaElegida}*\n` +
-    `👤 Elegida por: *@${m.sender.split('@')[0]}*`,
-    null,
-    { mentions: [m.sender] }
+    `🎉 ¡Mascota establecida!\n\n🐾 *${mascotaElegida}*`
   )
 }
 
-handler.help = ['mimascota']
+handler.help = ['mimascota <mascota>']
 handler.tags = ['rpg']
 handler.command = ['mimascota']
 
