@@ -1,51 +1,84 @@
-const handler = async (m, { conn, text }) => {
-  if (!text && m.quoted?.text) text = m.quoted.text;
+import axios from "axios"
+import { Sticker } from "wa-sticker-formatter"
 
-  if (!text) {
+const API_BASE = (global.APIs.may || "").replace(/\/+$/, "")
+const API_KEY = global.APIKeys.may || ""
+
+const handler = async (
+  m,
+  { conn, args = [], usedPrefix = ".", command = "brat" }
+) => {
+
+  const quotedText =
+    m.quoted?.text ||
+    m.quoted?.caption ||
+    m.quoted?.conversation ||
+    ""
+
+  const text = args.join(" ").trim()
+  const input = String(text || quotedText || "").trim()
+
+  if (!input) {
     return conn.sendMessage(
       m.chat,
       {
-        text: "𝖠𝗀𝗋𝖾𝗀𝖺 𝖳𝖾𝗑𝗍𝗈 𝖮 𝖱𝖾𝗌𝗉𝗈𝗇𝖽𝖾 𝖠 𝖴𝗇 𝖬𝖾𝗇𝗌𝖺𝗃𝖾 𝖯𝖺𝗋𝖺 𝖢𝗋𝖾𝖺𝗋 𝖤𝗅 𝖲𝗍𝗂𝖼𝗄𝖾𝗋 𝖡𝗋𝖺𝗍",
-        ...global.rcanal
+        text: `✳️ Usa:
+${usedPrefix}${command} <texto>
+O responde a un mensaje con ${usedPrefix}${command}`
       },
       { quoted: m }
-    );
+    )
   }
 
-  try {
-    await conn.sendMessage(m.chat, { react: { text: "🕒", key: m.key } });
+  await conn.sendMessage(m.chat, {
+    react: { text: "🕒", key: m.key }
+  })
 
-        const url = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}`
+  try {
+    const senderName = m.pushName || "Usuario"
+
+    const res = await axios.get(`${API_BASE}/brat`, {
+      params: { text: input, apikey: API_KEY }
+    })
+
+    if (!res.data?.status) throw "Error API"
+
+    const imgUrl = res.data.result.url
+
+    const img = await axios.get(imgUrl, {
+      responseType: "arraybuffer"
+    })
+
+    const sticker = new Sticker(img.data, {
+      type: "full",
+      pack: senderName,
+      author: "",
+      quality: 100
+    })
+
+    const stickerBuffer = await sticker.toBuffer()
 
     await conn.sendMessage(
       m.chat,
-      {
-        sticker: { url },
-        packname: "",
-        author: "",
-        ...global.rcanal
-      },
+      { sticker: stickerBuffer },
       { quoted: m }
-    );
+    )
 
-    await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+    await conn.sendMessage(m.chat, {
+      react: { text: "✅", key: m.key }
+    })
 
   } catch (e) {
-    console.error(e);
-    await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
-
-    return conn.sendMessage(
+    await conn.sendMessage(
       m.chat,
-      {
-        text: "𝖮𝖼𝗎𝗋𝗋𝗂𝗈 𝖴𝗇 𝖤𝗋𝗋𝗈𝗋 𝖠𝗅 𝖦𝖾𝗇𝖾𝗋𝖺𝗋 𝖤𝗅 𝖲𝗍𝗂𝖼𝗄𝖾𝗋",
-        ...global.rcanal
-      },
+      { text: `❌ Error: ${e}` },
       { quoted: m }
-    );
+    )
   }
-};
+}
 
+handler.command = ["brat"]
 handler.help = ["𝖡𝗋𝖺𝗍 <𝖳𝖾𝗑𝗍𝗈>"]
 handler.tags = ["𝖲𝖳𝖨𝖢𝖪𝖤𝖱𝖲"]
-handler.command = /^brat$/i;
-export default handler;
+
+export default handler
