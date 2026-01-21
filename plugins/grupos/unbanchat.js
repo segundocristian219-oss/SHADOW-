@@ -1,7 +1,7 @@
 let handler = async (m, { conn, isAdmin, isROwner} ) => {
     if (!(isAdmin || isROwner)) return dfail('admin', m, conn)
     global.db.data.chats[m.chat].isBanned = false
-    m.reply('🔓 Bot activo en este grupo.')   
+    m.reply('🔓 Bot activo no estes chingando.')   
 }
 handler.help = ['desbanearbot']
 handler.tags = ['group']
