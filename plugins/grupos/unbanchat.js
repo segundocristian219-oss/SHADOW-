@@ -5,7 +5,7 @@ let handler = async (m, { conn, isAdmin, isROwner} ) => {
 }
 handler.help = ['desbanearbot']
 handler.tags = ['group']
-handler.command = ['vuelve', 'unbanchat']
+handler.command = ['hola', 'unbanchat']
 handler.group = true 
 handler.owner = true
 export default handler
