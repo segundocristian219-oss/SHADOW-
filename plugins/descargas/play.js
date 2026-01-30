@@ -1,45 +1,41 @@
-import axios from "axios"
 import yts from "yt-search"
+import axios from "axios"
 
-const API_BASE = (global.APIs?.may || "").replace(/\/+$/, "")
-const API_KEY  = global.APIKeys?.may || ""
+const API_URL = "https://api-adonix.ultraplus.click/download/ytaudio"
+const API_KEY = "Angxlllll"
 
-const handler = async (msg, { conn, args, usedPrefix, command }) => {
-
-  const chatId = msg.key.remoteJid
+const handler = async (m, { conn, args }) => {
   const query = args.join(" ").trim()
+  if (!query) return m.reply("🎶 Ingresa el nombre del video de YouTube.")
 
-  if (!query)
-    return conn.sendMessage(chatId, {
-      text: `✳️ Usa:\n${usedPrefix}${command} <nombre de canción>\nEj:\n${usedPrefix}${command} no surprises`
-    }, { quoted: msg })
-
-  conn.sendMessage(chatId, { react: { text: "🕒", key: msg.key } }).catch(() => {})
+  await conn.sendMessage(m.chat, {
+    react: { text: "🕘", key: m.key }
+  })
 
   try {
     const search = await yts(query)
     const video = search?.videos?.[0]
-    if (!video) throw "No se encontró ningún resultado"
+    if (!video) throw 0
 
-    const title    = video.title
-    const author   = video.author?.name || "Desconocido"
-    const duration = video.timestamp || "Desconocida"
-    const thumb    = video.thumbnail || "https://i.ibb.co/3vhYnV0/default.jpg"
-    const link     = video.url
+    await conn.sendMessage(
+      m.chat,
+      {
+        image: { url: video.thumbnail },
+        caption: `
+✧━───『 𝙄𝙣𝙛𝙤 𝙙𝙚𝙡 𝙑𝙞𝙙𝙚𝙤 』───━✧
 
-    conn.sendMessage(chatId, {
-      image: { url: thumb },
-      caption: `
-⭒ ִֶָ७ ꯭🎵˙⋆｡ - *Título:* ${title}
-⭒ ִֶָ७ ꯭🎤˙⋆｡ - *Artista:* ${author}
-⭒ ִֶָ७ ꯭🕑˙⋆｡ - *Duración:* ${duration}
+🎼 Título: ${video.title}
+📺 Canal: ${video.author?.name || "—"}
+👁️ Vistas: ${formatViews(video.views)}
+⏳ Duración: ${video.timestamp || "—"}
 `.trim()
-    }, { quoted: msg }).catch(() => {})
+      },
+      { quoted: m }
+    )
 
-    const res = await axios.get(`${API_BASE}/ytdl`, {
+    const { data } = await axios.get(API_URL, {
       params: {
-        url: link,
-        type: "Mp3",
+        url: video.url,
         apikey: API_KEY
       },
       headers: {
@@ -49,36 +45,45 @@ const handler = async (msg, { conn, args, usedPrefix, command }) => {
       timeout: 20000
     })
 
-    const data = res?.data
-    const audioUrl = data?.result?.url
+    const audioUrl =
+      data?.data?.url ||
+      data?.datos?.url ||
+      null
 
-    if (
-      !data?.status ||
-      !audioUrl ||
-      typeof audioUrl !== "string" ||
-      !audioUrl.startsWith("http")
-    ) throw "La API no devolvió un audio válido"
+    if (!audioUrl || !/^https?:\/\//i.test(audioUrl)) throw 0
 
-    const cleanTitle = (data.result.title || title).replace(/\.mp3$/i, "")
+    await conn.sendMessage(
+      m.chat,
+      {
+        audio: { url: audioUrl },
+        mimetype: "audio/mpeg",
+        fileName: cleanName(video.title) + ".mp3",
+        ptt: false
+      },
+      { quoted: m }
+    )
 
-    await conn.sendMessage(chatId, {
-      audio: { url: audioUrl },
-      mimetype: "audio/mpeg",
-      fileName: `${cleanTitle}.mp3`,
-      ptt: false
-    }, { quoted: msg })
+    await conn.sendMessage(m.chat, {
+      react: { text: "✅", key: m.key }
+    })
 
-    conn.sendMessage(chatId, { react: { text: "✅", key: msg.key } }).catch(() => {})
-
-  } catch (e) {
-    conn.sendMessage(chatId, {
-      text: `❌ Error: ${typeof e === "string" ? e : "Fallo interno"}`
-    }, { quoted: msg })
+  } catch {
+    await m.reply("❌ Error al obtener el audio.")
   }
 }
 
-handler.command = ["play", "ytplay"]
-handler.help    = ["play <texto>"]
-handler.tags    = ["descargas"]
+const cleanName = t =>
+  t.replace(/[^\w\s.-]/gi, "").substring(0, 60)
+
+const formatViews = v => {
+  if (typeof v !== "number") return v
+  if (v >= 1e9) return (v / 1e9).toFixed(1) + "B"
+  if (v >= 1e6) return (v / 1e6).toFixed(1) + "M"
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + "K"
+  return v.toString()
+}
+
+handler.command = ["play", "yt", "mp3"]
+handler.tags = ["descargas"]
 
 export default handler
