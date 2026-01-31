@@ -2,8 +2,8 @@ import pkg from '@whiskeysockets/baileys'
 const { generateWAMessageContent, generateWAMessageFromContent, proto } = pkg
 
 let handler = async (m, { conn }) => {
-  const proses = `✨\n *Obteniendo información de mis creadores...*`
-  await conn.sendMessage(m.chat, { text: proses }, { quoted: m })
+
+  await conn.sendMessage(m.chat, { react: { text: "🔥", key: m.key } })
 
   async function createImage(url) {
     const { imageMessage } = await generateWAMessageContent(
@@ -15,23 +15,27 @@ let handler = async (m, { conn }) => {
 
   const owners = [
     {
-      name: '𝖧𝖾𝗋𝗇𝖺𝗇𝖽𝖾𝗌.𝗑𝗒𝗓',
-      desc: `👑 Creador Principal de 𝑺𝑯𝑨𝑫𝑶𝑾 𝑩𝑶𝑻`,
-      image: 'https://cdn.russellxz.click/af65870a.jpeg',
-      footer: '𝗄𝗄',
+      name: '𝖠𝗇𝗀𝖾𝗅.𝗑𝗒𝗓',
+      desc: `𝖢𝗋𝖾𝖺𝖽𝗈𝗋 𝗒 𝖣𝖾𝗌𝖺𝗋𝗋𝗈𝗅𝗅𝖺𝖽𝗈𝗋 𝖯𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅 𝖣𝖾 𝖠𝗇𝗀𝖾𝗅 𝖡𝗈𝗍 👑`,
+      image: 'https://cdn.russellxz.click/b1af0aef.jpeg',
       buttons: [
-        { name: 'WhatsApp', url: 'https://wa.me/5212213479743' }
-
+        { name: 'WhatsApp', url: 'https://wa.me/5215911153853' }
       ]
     },
     {
-      name: 'Cxsper.𝗑𝗒𝗓',
-      desc: 'tester oficial 🏞️',
-      image: 'https://cdn.russellxz.click/60c40448.jpeg',
-      footer: '𝖭𝗂𝖼𝖾 𝖣𝗈 𝖸𝗈𝗎',
+      name: '𝖠𝗇𝗀𝖾𝗅.𝖿𝗀𝗓',
+      desc: '𝖴𝗇𝗈 𝖣𝖾 𝖫𝗈𝗌 𝖨𝗇𝗏𝖾𝗋𝗌𝗂𝗈𝗇𝗂𝗌𝗍𝖺𝗌 𝖯𝗋𝗂𝗇𝖼𝗂𝗉𝖺𝗅𝖾𝗌 🗣️',
+      image: 'https://cdn.russellxz.click/295d5247.jpeg',
       buttons: [
-        { name: 'WhatsApp', url: 'https://wa.me/5218110030725' }
-
+        { name: 'WhatsApp', url: 'https://wa.me/5215584393251' }
+      ]
+    },
+    {
+      name: '𝖠𝗇𝗀𝖾𝗅.𝗌𝗍𝖺𝖿𝖿',
+      desc: '𝖬𝗂𝖾𝗆𝖻𝗋𝗈 𝖮𝖿𝗂𝖼𝗂𝖺𝗅 𝖣𝖾𝗅 𝖤𝗊𝗎𝗂𝗉𝗈 𝖠𝗇𝗀𝖾𝗅 𝖡𝗈𝗍 ⚙️',
+      image: 'https://files.catbox.moe/piu53i.jpg',
+      buttons: [
+        { name: 'WhatsApp', url: 'https://wa.me/5212213479743' }
       ]
     }
   ]
@@ -51,9 +55,6 @@ let handler = async (m, { conn }) => {
     cards.push({
       body: proto.Message.InteractiveMessage.Body.fromObject({
         text: `*${owner.name}*\n${owner.desc}`
-      }),
-      footer: proto.Message.InteractiveMessage.Footer.fromObject({
-        text: owner.footer
       }),
       header: proto.Message.InteractiveMessage.Header.fromObject({
         hasMediaAttachment: true,
@@ -75,12 +76,6 @@ let handler = async (m, { conn }) => {
             deviceListMetadataVersion: 2
           },
           interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-            body: proto.Message.InteractiveMessage.Body.create({
-              text: `👑 Creadores de 𝑺𝑯𝑨𝑫𝑶𝑾 𝑩𝑶𝑻`
-            }),
-            footer: proto.Message.InteractiveMessage.Footer.create({
-              text: 'Conoce a los desarrolladores del bot'
-            }),
             carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
               cards
             })
@@ -94,7 +89,6 @@ let handler = async (m, { conn }) => {
   await conn.relayMessage(m.chat, slideMessage.message, { messageId: slideMessage.key.id })
 }
 
-handler.tags = ['main']
 handler.command = handler.help = ['donar', 'owner', 'cuentasoficiales', 'creador', 'cuentas']
 
 export default handler
