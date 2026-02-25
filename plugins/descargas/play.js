@@ -1,89 +1,135 @@
-import yts from "yt-search"
-import axios from "axios"
+import yts from 'yt-search'
+import axios from 'axios'
+import crypto from 'crypto'
 
-const API_URL = "https://api-adonix.ultraplus.click/download/ytaudio"
-const API_KEY = "Angxlllll"
+const BASE_HEADERS = {
+  'User-Agent': 'Mozilla/5.0',
+  'Content-Type': 'application/json',
+  origin: 'https://save-tube.com',
+  referer: 'https://save-tube.com/'
+}
 
-const handler = async (m, { conn, args }) => {
-  const query = args.join(" ").trim()
-  if (!query) return m.reply("🎶 Ingresa el nombre del video de YouTube.")
+const handler = async (msg, { conn, args, usedPrefix, command }) => {
+  const query = args.join(' ').trim()
 
-  await conn.sendMessage(m.chat, {
-    react: { text: "🕘", key: m.key }
-  })
+  if (!query)
+    return conn.sendMessage(
+      msg.chat,
+      { text: `✳️ Usa:\n${usedPrefix}${command} <nombre del video>` },
+      { quoted: msg }
+    )
+
+  await conn.sendMessage(
+    msg.chat,
+    { text: '*🎧 Descargando audio...*' },
+    { quoted: msg }
+  )
 
   try {
     const search = await yts(query)
-    const video = search?.videos?.[0]
-    if (!video) throw 0
+    if (!search.videos?.length)
+      throw new Error('No se encontró el audio.')
+
+    const url = search.videos[0].url
+
+    const dl = await savetube.download(url)
+    if (!dl.status)
+      throw new Error(dl.error || 'Error en descarga.')
 
     await conn.sendMessage(
-      m.chat,
+      msg.chat,
       {
-        image: { url: video.thumbnail },
-        caption: `
-✧━───『 𝙄𝙣𝙛𝙤 𝙙𝙚𝙡 𝙑𝙞𝙙𝙚𝙤 』───━✧
-
-🎼 Título: ${video.title}
-📺 Canal: ${video.author?.name || "—"}
-👁️ Vistas: ${formatViews(video.views)}
-⏳ Duración: ${video.timestamp || "—"}
-`.trim()
+        audio: { url: dl.result.download },
+        mimetype: 'audio/mpeg',
+        fileName: `${sanitizeFilename(dl.result.title)}.mp3`
       },
-      { quoted: m }
+      { quoted: msg }
     )
 
-    const { data } = await axios.get(API_URL, {
-      params: {
-        url: video.url,
-        apikey: API_KEY
-      },
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json"
-      },
-      timeout: 20000
-    })
-
-    const audioUrl =
-      data?.data?.url ||
-      data?.datos?.url ||
-      null
-
-    if (!audioUrl || !/^https?:\/\//i.test(audioUrl)) throw 0
-
+  } catch (e) {
     await conn.sendMessage(
-      m.chat,
-      {
-        audio: { url: audioUrl },
-        mimetype: "audio/mpeg",
-        fileName: cleanName(video.title) + ".mp3",
-        ptt: false
-      },
-      { quoted: m }
+      msg.chat,
+      { text: `❌ Error:\n${e.message}` },
+      { quoted: msg }
     )
-
-    await conn.sendMessage(m.chat, {
-      react: { text: "✅", key: m.key }
-    })
-
-  } catch {
-    await m.reply("❌ Error al obtener el audio.")
   }
 }
 
-const cleanName = t =>
-  t.replace(/[^\w\s.-]/gi, "").substring(0, 60)
-
-const formatViews = v => {
-  if (typeof v !== "number") return v
-  if (v >= 1e9) return (v / 1e9).toFixed(1) + "B"
-  if (v >= 1e6) return (v / 1e6).toFixed(1) + "M"
-  if (v >= 1e3) return (v / 1e3).toFixed(1) + "K"
-  return v.toString()
-}
-
-handler.command = ["play", "yt", "mp3"]
-handler.tags = ["descargas"]
+handler.help = ['play <título>', 'ytmp3 <título>']
+handler.tags = ['download']
+handler.command = ['play', 'ytamp3']
 
 export default handler
+
+function sanitizeFilename(name = 'audio') {
+  return name.replace(/[\\/:*?"<>|]+/g, '').trim().slice(0, 100)
+}
+
+const savetube = {
+  key: Buffer.from('C5D58EF67A7584E4A29F6C35BBC4EB12', 'hex'),
+
+  decrypt(enc) {
+    const b = Buffer.from(enc.replace(/\s/g, ''), 'base64')
+    const iv = b.subarray(0, 16)
+    const data = b.subarray(16)
+    const d = crypto.createDecipheriv('aes-128-cbc', this.key, iv)
+    return JSON.parse(Buffer.concat([d.update(data), d.final()]).toString())
+  },
+
+  async download(url) {
+    try {
+      const random = await axios.get(
+        'https://media.savetube.vip/api/random-cdn',
+        { headers: BASE_HEADERS }
+      )
+
+      const cdn = random.data?.cdn
+      if (!cdn)
+        return { status: false, error: 'No se obtuvo CDN.' }
+
+      const info = await axios.post(
+        `https://${cdn}/v2/info`,
+        { url },
+        { headers: BASE_HEADERS }
+      )
+
+      if (!info.data?.status)
+        return { status: false, error: 'Video no disponible en API.' }
+
+      const json = this.decrypt(info.data.data)
+
+      if (!json.audio_formats?.length)
+        return { status: false, error: 'No hay formatos de audio.' }
+
+      const format =
+        json.audio_formats.find(a => a.quality === 128) ||
+        json.audio_formats[0]
+
+      const dlRes = await axios.post(
+        `https://${cdn}/download`,
+        {
+          id: json.id,
+          key: json.key,
+          downloadType: 'audio',
+          quality: String(format.quality)
+        },
+        { headers: BASE_HEADERS }
+      )
+
+      const downloadUrl = dlRes.data?.data?.downloadUrl
+      if (!downloadUrl)
+        return { status: false, error: 'No se pudo generar el enlace.' }
+
+      return {
+        status: true,
+        result: {
+          title: json.title,
+          download: downloadUrl
+        }
+      }
+
+    } catch (e) {
+      return { status: false, error: e.message }
+    }
+  }
+}
