@@ -16,8 +16,8 @@ const handler = async (m, { conn }) => {
     const url = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}`
     await conn.sendMessage(m.chat, {
       sticker: { url },
-      packname: "YAIR BOT",
-      author: "YAIR BOT",
+      packname: "𝐘𝐀𝐈𝐑 𝐁𝐎𝐓",
+      author: "𝐘𝐀𝐈𝐑 𝐁𝐎𝐓",
     }, { quoted: m })
 
     // reacción ✅
