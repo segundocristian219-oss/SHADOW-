@@ -26,7 +26,7 @@ async function retry(fn, times = 3) {
 }
 
 async function getTikTokVideo(url) {
-const providers = [
+  const providers = [
     async () => {
       const r = await axios.get(
         `https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(url)}`,
@@ -65,7 +65,7 @@ const handler = async (msg, { conn, args }) => {
       { quoted: msg }
     )
 
-if (!/^https?:\/\//i.test(url) || !/tiktok\.com/i.test(url))
+  if (!/^https?:\/\//i.test(url) || !/tiktok\.com/i.test(url))
     return conn.sendMessage(
       chatId,
       { text: "🚩 *Enlace inválido*" },
@@ -84,7 +84,7 @@ if (!/^https?:\/\//i.test(url) || !/tiktok\.com/i.test(url))
         chatId,
         { text: "❌ *No se pudo obtener el video*" },
         { quoted: msg }
-
+      )
 
     const res = await axios.get(videoUrl, {
       ...AXIOS_CFG,
@@ -100,7 +100,7 @@ if (!/^https?:\/\//i.test(url) || !/tiktok\.com/i.test(url))
       )
 
     await conn.sendMessage(
-chatId,
+      chatId,
       {
         video: Buffer.from(res.data),
         mimetype: "video/mp4"
