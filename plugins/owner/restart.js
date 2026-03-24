@@ -11,7 +11,7 @@ const handler = async (msg, { conn }) => {
 
   // Mensaje de aviso
   await conn.sendMessage(chatId, {
-    text: "🔄 *SHADOW BOT se reiniciará en unos segundos...*"
+    text: "🔄 *𝐘𝐀𝐈𝐑 𝐃𝐎𝐌𝐀𝐃𝐎 𝐗 se reiniciará en unos segundos...*"
   }, { quoted: msg });
 
   // Guardar chat para notificar luego
