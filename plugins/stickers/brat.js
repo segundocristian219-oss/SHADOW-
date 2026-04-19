@@ -1,38 +1,84 @@
-const handler = async (m, { conn }) => {
-  const body = m.text?.trim()
-  if (!body) return
+import axios from "axios"
+import { Sticker } from "wa-sticker-formatter"
 
-  if (!/^brat|.brat\s+/i.test(body)) return
+const API_BASE = (global.APIs.may || "").replace(/\/+$/, "")
+const API_KEY = global.APIKeys.may || ""
 
-  const text = body.replace(/^(brat|.brat)\s+/i, "").trim()
-  if (!text) {
-    return m.reply(`☁️ 𝘼𝙂𝙍𝙀𝙂𝘼 𝙏𝙀𝙓𝙏𝙊 𝙋𝘼𝙍𝘼 𝙂𝙀𝙉𝙀𝙍𝘼𝙍 𝙀𝙇 𝙎𝙏𝙄𝘾𝙆𝙀𝙍\n\nEjemplo: brat angelito`)
+const handler = async (
+  m,
+  { conn, args = [], usedPrefix = ".", command = "brat" }
+) => {
+
+  const quotedText =
+    m.quoted?.text ||
+    m.quoted?.caption ||
+    m.quoted?.conversation ||
+    ""
+
+  const text = args.join(" ").trim()
+  const input = String(text || quotedText || "").trim()
+
+  if (!input) {
+    return conn.sendMessage(
+      m.chat,
+      {
+        text: `✳️ Usa:
+${usedPrefix}${command} <texto>
+O responde a un mensaje con ${usedPrefix}${command}`
+      },
+      { quoted: m }
+    )
   }
 
+  await conn.sendMessage(m.chat, {
+    react: { text: "🕒", key: m.key }
+  })
+
   try {
-    // reacción ⌛
-    await conn.sendMessage(m.chat, { react: { text: "⌛", key: m.key } })
+    const senderName = m.pushName || "Usuario"
 
-    const url = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}`
+    const res = await axios.get(`${API_BASE}/brat`, {
+      params: { text: input, apikey: API_KEY }
+    })
+
+    if (!res.data?.status) throw "Error API"
+
+    const imgUrl = res.data.result.url
+
+    const img = await axios.get(imgUrl, {
+      responseType: "arraybuffer"
+    })
+
+    const sticker = new Sticker(img.data, {
+      type: "full",
+      pack: senderName,
+      author: "",
+      quality: 100
+    })
+
+    const stickerBuffer = await sticker.toBuffer()
+
+    await conn.sendMessage(
+      m.chat,
+      { sticker: stickerBuffer },
+      { quoted: m }
+    )
+
     await conn.sendMessage(m.chat, {
-      sticker: { url },
-      packname: "𝐘𝐀𝐈𝐑 𝐁𝐎𝐓",
-      author: "𝐘𝐀𝐈𝐑 𝐁𝐎𝐓",
-    }, { quoted: m })
+      react: { text: "✅", key: m.key }
+    })
 
-    // reacción ✅
-    await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } })
   } catch (e) {
-    console.error(e)
-    await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } })
-    conn.reply(m.chat, '❌ 𝙀𝙍𝙍𝙊𝙍 𝘼𝙇 𝙂𝙀𝙉𝙀𝙍𝘼𝙍 𝙀𝙇 𝙎𝙏𝙄𝘾𝙆𝙀𝙍', m)
+    await conn.sendMessage(
+      m.chat,
+      { text: `❌ Error: ${e}` },
+      { quoted: m }
+    )
   }
 }
 
-// igual que play: brat <texto> o .brat <texto>
-handler.customPrefix = /^(brat|.brat)\s+/i
-handler.command = new RegExp
-handler.help = ["brat <texto>"]
-handler.tags = ["sticker"]
+handler.command = ["brat"]
+handler.help = ["𝖡𝗋𝖺𝗍 <𝖳𝖾𝗑𝗍𝗈>"]
+handler.tags = ["𝖲𝖳𝖨𝖢𝖪𝖤𝖱𝖲"]
 
 export default handler
