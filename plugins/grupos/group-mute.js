@@ -4,7 +4,7 @@ import fs from 'fs/promises'
 
 const OWNER_LID  =  '217158512549931@lid'
 
-const OWNER_LID2  =  '128209823764660@lid'
+const OWNER_LID2  =  ''
 
 const DB_DIR = './database'
 
