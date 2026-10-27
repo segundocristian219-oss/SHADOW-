@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url'
 
 global.owner = [
   ['52117203085653', 'Yair', true],
-  ['52177206000000', 'Yair2', false]
+  ['52177206000000', 'Yair2', true]
 ]
 
 global.mods = []
@@ -18,6 +18,9 @@ global.banner = 'https://files.catbox.moe/901j7x.jpg'
 global.packname = '𝐘𝐀𝐈𝐑 𝐁𝐎𝐓'
 global.author = '𝖣𝖾𝗌𝖺𝗋𝗅𝗅𝖺𝖽𝗈 𝗉𝗈𝗋 𝐇𝐄𝐑𝐍𝐀𝐍𝐃𝐄𝐙'
 global.sessions = 'ShadowSession' 
+global.public = true
+global.pairingCode = false
+global.prefix = '.'
 
 global.APIs = {
 sky: 'https://api-sky.ultraplus.click',
