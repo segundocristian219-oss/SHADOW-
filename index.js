@@ -1,4 +1,4 @@
-import './config.js' )
+import './config.js'
 import cluster from 'cluster'
 import fs from 'fs'
 import path from 'path'
