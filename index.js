@@ -1,4 +1,4 @@
-require('./config.js')'
+require('./config.js')
 import cluster from 'cluster'
 import fs from 'fs'
 import path from 'path'
