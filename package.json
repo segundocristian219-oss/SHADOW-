@@ -7,9 +7,11 @@
   "scripts": {
     "start": "node index.js"
   },
-  "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.24",
+    "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.8",
+    "jimp": "^0.16.1",
     "awesome-phonenumber": "^5.4.0",
+    ...
     "chalk": "^4.1.2",
     "cheerio": "^1.0.0",
     "file-type": "^16.5.4",
