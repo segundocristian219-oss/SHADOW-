@@ -3,7 +3,7 @@ import chalk from 'chalk'
 import { fileURLToPath } from 'url'
 
 global.owner = [
-'217158512549931', 
+'52117203085653', 
 '227045091090524',
 '176077234241766 ', 
 '217158512549931'
