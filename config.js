@@ -17,7 +17,7 @@ global.botname = '𝐘𝐀𝐈𝐑 𝐁𝐎𝐓'
 global.banner = 'https://files.catbox.moe/901j7x.jpg'
 global.packname = '𝐘𝐀𝐈𝐑 𝐁𝐎𝐓'
 global.author = '𝖣𝖾𝗌𝖺𝗋𝗅𝗅𝖺𝖽𝗈 𝗉𝗈𝗋 𝐇𝐄𝐑𝐍𝐀𝐍𝐃𝐄𝐙'
-global.sessions = 'SHADOW BOT'
+global.sessions = 'ShadowSession' 
 
 global.APIs = {
 sky: 'https://api-sky.ultraplus.click',
