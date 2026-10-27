@@ -1,22 +1,12 @@
 {
-  "name": "angel-bot",
-  "version": "3.0.0",
-  "type": "module",
-  "engines": {
-    "node": ">=18"
-  },
-  "scripts": {
-    "start": "node index.js"
-  },
+  "name": "shadow",
+  "version": "2.0.0",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": { "start": "node index.js" },
   "dependencies": {
-"@whiskeysockets/baileys":"github:ds6/buils",
-    "chalk": "^5.3.0",
-    "node-cache": "^5.1.2",
-    "pino": "^8.19.0",
-    "yt-search":"^2.10.3",
-    "syntax-error": "^1.4.0",
-    "ws": "^8.16.0",
-    "yargs": "^17.7.2",
-    "google-libphonenumber": "^3.2.33"
+    "@whiskeysockets/baileys": "^6.7.18",
+    "pino": "^8.17.0",
+    "qrcode-terminal": "^0.12.0"
   }
-}
+} 
