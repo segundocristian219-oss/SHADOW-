@@ -1,6 +1,8 @@
 {
-  "name": "shadow",
-  "version": "2.0.0",
+  "name": "Shadow-Ai",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "SHADOW Bot",
   "main": "index.js",
   "type": "commonjs",
   "scripts": { "start": "node index.js" },
