@@ -1,7 +1,7 @@
 {
-  "name": "shadow-bot",
+  "name": "yair-bot",
   "version": "1.0.0",
-  "description": "Bot WhatsApp Shadow",
+  "description": "YAIR BOT",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -9,8 +9,11 @@
   },
   "dependencies": {
     "@whiskeysockets/baileys": "6.7.8",
+    "chalk": "^4.1.2",
     "pino": "^8.17.2",
     "qrcode-terminal": "^0.12.0",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "awesome-phonenumber": "^2.64.0",
+    "file-type": "^16.5.4"
   }
 }
