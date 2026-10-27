@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js"
   },
-    "dependencies": {
+  "dependencies": {
     "@whiskeysockets/baileys": "^6.7.24",
     "awesome-phonenumber": "^5.4.0",
     "chalk": "^4.1.2",
@@ -16,6 +16,7 @@
     "form-data": "^4.0.0",
     "google-libphonenumber": "^3.2.33",
     "human-readable": "^0.2.1",
+    "jimp": "^0.22.10",
     "jsdom": "^22.1.0",
     "moment-timezone": "^0.5.43",
     "node-cache": "^5.1.2",
@@ -27,6 +28,6 @@
     "syntax-error": "^1.4.0",
     "axios": "^1.6.2",
     "figlet": "^1.7.0",
-        "open": "^8.4.2"
+    "open": "^8.4.2"
   }
-}
+} 
